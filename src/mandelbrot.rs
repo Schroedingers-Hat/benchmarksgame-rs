@@ -6,6 +6,7 @@
 
 use std::io::Write;
 use std::thread;
+use std::sync::Arc;
 const THREADS: usize = 20;
 const MAX_ITER: usize = 50;
 const VLEN: usize = 8;
@@ -71,13 +72,13 @@ fn main() {
         xvals[i] = i as f64 * inv - 1.5;
         yvals[i] = i as f64 * inv - 1.0;
     }
-    let xloc = &xvals;
-    let yloc = &yvals;
+    let xloc = Arc::new(xvals);
+    let yloc = Arc::new(yvals);
 
     assert!(size % THREADS == 0);// FIXME
     let handles: Vec<_> = (0..THREADS).map(|e| {
-        let xloc = xloc.to_vec();
-        let yloc = yloc.to_vec();
+        let xloc = xloc.clone();
+        let yloc = yloc.clone();
         thread::spawn(move || {
             let mut rows = vec![vec![0 as u8; size / 8]; size / THREADS];
             for y in 0..size / THREADS {
